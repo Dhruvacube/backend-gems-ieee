@@ -6,12 +6,10 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from ..vars import Base
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import validates
 
-from sqlalchemy import Column
-from ..vars import Base
+from ..utility import Base
 
 import datetime, re
 import phonenumbers
@@ -65,6 +63,9 @@ class Guest(Base):
 class User(Guest):
     __tablename__ = "users"
     
+    id = mapped_column(Integer, primary_key=True, index=True)
+    name = mapped_column(String, index=True)
+    email = mapped_column(String, index=True)
     hashed_password = Column(String)
     organizations: Mapped[List["Organization"]] = relationship(back_populates="users")
 

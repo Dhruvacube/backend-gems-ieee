@@ -1,4 +1,4 @@
-import sys, asyncio, click, subprocess, importlib, traceback
+import sys, asyncio, click, subprocess, importlib, traceback, uvicorn
 
 from vars import BASE_DIR
 from .database import Base, Session
@@ -18,8 +18,9 @@ else:
 def main(ctx):
     """Lays out the steps on how to launch the api server."""
     if ctx.invoked_subcommand is None:
-        print("In the same bash terminal type out the following command to start the server:")
-        print("uvicorn main:app --host 0.0.0.0 --port 80")
+        # print("In the same bash terminal type out the following command to start the server:")
+        # print("uvicorn main:app --host 0.0.0.0 --port 80")
+        uvicorn.run("main:app", port=80, log_level="info")
 
 async def create_tables():
     engine = Session.get_engine()
@@ -47,7 +48,7 @@ def init(models):
     run = asyncio.get_event_loop().run_until_complete
     if not models:
         models = [
-            f"database.models.{e}" for e in (BASE_DIR / "database/models").walk(on_error=print)[3] # type:ignore
+            f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else Trie,(BASE_DIR / "database/models").walk(on_error=print)[3]) # type:ignore
         ]
     else:
         models = [
@@ -77,7 +78,7 @@ def drop(models):
     click.confirm("Do you really want to do this?", abort=True)
     if models.lower() == "all":
         models = [
-            f"database.models.{e}" for e in (BASE_DIR / "database/models").walk(on_error=print)[3] # type:ignore
+            f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else Trie,(BASE_DIR / "database/models").walk(on_error=print)[3]) # type:ignore
         ]
     else:
         models = [
