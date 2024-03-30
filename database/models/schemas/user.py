@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 import datetime
 
@@ -9,8 +9,8 @@ class OrganizationSchema(BaseModel):
 
 class GuestSchema(BaseModel):
     name: str
-    email: str
-    alt_email: Optional[str]
+    email: EmailStr
+    alt_email: Optional[EmailStr]
     phone: str
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -22,14 +22,14 @@ class GuestCreateSchema(GuestSchema):
     valid_till: Optional[datetime.datetime]
 
 class UserCreateSchema(BaseModel):
-    unique_id: str
+    invite_id: str
     password: str
 
 class UserLoginSchema(BaseModel):
     email: str
     password: str
 
-class UserLogoutSchema(UserLoginSchema):
+class UserLogoutSchema(BaseModel):
     jwt_token: str
 
 class UserEditSchema(GuestCreateSchema):

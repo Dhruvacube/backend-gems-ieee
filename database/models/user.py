@@ -19,22 +19,22 @@ from phonenumbers.phonenumberutil import number_type
 class Organization(Base):
     __tablename__ = "organizations"
 
-    id = mapped_column(Integer, primary_key=True, index=True)
+    id = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
     name = mapped_column(String, index=True)
     role = mapped_column(String, index=True)
     valid_till = mapped_column(DateTime, default=datetime.datetime.utcnow)
     
     def __repr__(self):
-        return f"<Organization {self.name}>"
+        return f"<Organization {self.name}, role: {self.role}, validity: {self.valid_till}>"
 
 class Guest(Base):
     __tablename__ = "guests"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
-    email = Column(String, index=True)
+    email = Column(String, index=True, unique=True)
     alt_email = Column(String, unique=True, index=True, nullable=True)
-    phone = Column(String, index=True)
+    phone = Column(String, index=True, unique=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
     organizations: Mapped[List["Organization"]] = relationship(back_populates="guests")
@@ -63,13 +63,14 @@ class Guest(Base):
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
-    email = Column(String, index=True)
+    email = Column(String, index=True, unique=True)
     alt_email = Column(String, unique=True, index=True, nullable=True)
-    phone = Column(String, index=True)
+    phone = Column(String, index=True, unique=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
+    invite_id = Column(String, index=True, unique=True, nullable=True)
     hashed_password = Column(String)
     organizations: Mapped[List["Organization"]] = relationship(back_populates="users")
     profile_photo = Column(String, nullable=True)
