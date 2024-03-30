@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -9,13 +10,12 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import validates
 
-from ..utility import Base
-
 import datetime, re
 import phonenumbers
 from phonenumbers import carrier
 from phonenumbers.phonenumberutil import number_type
 
+Base = declarative_base()
 class Organization(Base):
     __tablename__ = "organizations"
 

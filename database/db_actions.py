@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import (
     select,
     insert,
@@ -7,8 +8,20 @@ from sqlalchemy import (
 from .models.auth import *
 from .models.user import *
 from .session import session_obj
-from .utility import hash_password
 from .models.schemas.user import *
+from .vars import MISSING
+
+from typing import Union
+from hashlib import sha256
+
+#hasing function
+def hash_password(password: str) -> Union[str, int]:
+    '''
+    Hashes the password using sha256 algorithm
+    :param password: str: password to be hashed
+    :return: str: hashed password
+    '''
+    return sha256(password.encode()).hexdigest()
 
 async def return_user(email: str, via_id):
     """
@@ -87,6 +100,68 @@ async def create_user(user: UserCreateSchema):
             name=guest_details.name,
             alt_email=guest_details.alt_email,
             organizations=guest_details.organizations
+        )
+        await session.execute(query)
+        await session.commit()
+
+async def create_invite(user: GuestCreateSchema) -> int:
+    """
+    Insert a user into the database
+    :param user: User object schema
+    :return: None
+    """
+    async with session_obj() as session:
+        if user.organization_name is not MISSING:
+            query = insert(Organization).values(
+                name=user.organization_name,
+                role=user.role,
+                valid_till=user.valid_till
+            ).returning(Organization.id)
+            result = await session.execute(query)
+            row = result.fetchone()
+            await session.commit()
+            
+            query = insert(Guest).values(
+                name=user.name,
+                email=user.email,
+                alt_email=user.alt_email,
+                phone=user.phone,
+                organizations=Organization(id=row.id, name=user.organization_name, role=user.role, valid_till=user.valid_till)
+            ).returning(Guest.id)
+        else:
+            query = insert(Guest).values(
+                name=user.name,
+                email=user.email,
+                alt_email=user.alt_email,
+                phone=user.phone
+            ).returning(Guest.id)
+        result = await session.execute(query)
+        row = result.fetchone()
+        await session.commit()
+        return int(row.id)
+
+async def get_session(session_data: UserLogoutSchema) -> bool:
+    """
+    Get a session from the database
+    :param session_data: Session data
+    :return: bool
+    """
+    async with session_obj() as session:
+        query = select(Session).where(
+            Session.token == session_data.jwt_token
+        )
+        record = await session.execute(query)
+        record = record.fetchone()
+    return record is not None or record is not MISSING
+
+async def delete_redundant_sessions():
+    """
+    Delete redundant sessions from the database
+    :return: None
+    """
+    async with session_obj() as session:
+        query = delete(Session).where(
+            Session.valid_till < datetime.datetime.now() - datetime.timedelta(minutes=15)
         )
         await session.execute(query)
         await session.commit()

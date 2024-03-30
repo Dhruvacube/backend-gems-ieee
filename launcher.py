@@ -1,7 +1,7 @@
 import sys, asyncio, click, subprocess, importlib, traceback, uvicorn, os
 
 from database.vars import BASE_DIR
-from database.utility import Base
+from database.db_actions import Base
 from database.session import Session
 from pathlib import Path
 

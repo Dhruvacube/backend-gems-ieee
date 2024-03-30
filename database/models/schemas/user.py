@@ -12,14 +12,6 @@ class GuestSchema(BaseModel):
     email: EmailStr
     alt_email: Optional[EmailStr]
     phone: str
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
-    
-
-class GuestCreateSchema(GuestSchema):
-    organization_name: Optional[str]
-    role: Optional[str]
-    valid_till: Optional[datetime.datetime]
 
 class UserCreateSchema(BaseModel):
     invite_id: str
@@ -31,6 +23,11 @@ class UserLoginSchema(BaseModel):
 
 class UserLogoutSchema(BaseModel):
     jwt_token: str
+
+class GuestCreateSchema(GuestSchema, UserLogoutSchema):
+    organization_name: Optional[str]
+    role: Optional[str]
+    valid_till: Optional[datetime.datetime]
 
 class UserEditSchema(GuestCreateSchema):
     profile_photo_link: Optional[str]

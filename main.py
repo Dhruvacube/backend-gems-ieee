@@ -19,9 +19,6 @@ else:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     uvloop.install()
 
-from sqlalchemy import (
-    select,
-)
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -78,6 +75,8 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 def logout(user: UserLogoutSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
+    elif not get_session(user):
+        raise HTTPException(status_code=400, detail="Invalid session")
     run(remove_session(user.jwt_token))
     return {
         "status": 200,
@@ -88,8 +87,35 @@ def logout(user: UserLogoutSchema, db=Depends(get_db)):
 def register(user: UserCreateSchema, db=Depends(get_db)):
     if query_user(user.invite_id, True) is not None:
         raise HTTPException(status_code=400, detail="A user with this invite id already exists")
-    create_user(user)
+    run(create_user(user))
     return {
         "status": 200,
         "message": "User created successfully",
     }
+
+@app.post("/invitation")
+def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
+    if invite.jwt_token is MISSING:
+        raise HTTPException(status_code=400, detail="No token provided")
+    elif not get_session(invite):
+        raise HTTPException(status_code=400, detail="Invalid session")
+    if query_user(invite.email) is not None:
+        raise HTTPException(status_code=400, detail="A user with this email already exists")
+    unique_id = run(create_invite(invite))
+    return {
+        "status": 200,
+        "message": "Invite created successfully",
+        "invitation_id": unique_id
+    }
+
+# @app.post("/edituser")
+# def edituser(user: UserEditSchema, db=Depends(get_db)):
+#     if user.jwt_token is MISSING:
+#         raise HTTPException(status_code=400, detail="No token provided")
+#     elif not get_session(user):
+#         raise HTTPException(status_code=400, detail="Invalid session")
+#     run(update_user(user))
+#     return {
+#         "status": 200,
+#         "message": "User updated successfully",
+#     }

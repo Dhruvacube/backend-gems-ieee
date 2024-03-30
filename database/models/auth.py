@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, DateTime
 
-from ..utility import Base
 from .user import User
 
 import datetime
 
 session_dt = lambda : datetime.datetime.utcnow()+datetime.timedelta(minutes=15)
-
+Base = declarative_base()
 class Session(Base):
     __tablename__ = "sessions"
 
