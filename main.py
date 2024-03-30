@@ -1,7 +1,10 @@
 from typing import Union
 
 from fastapi import FastAPI
+from fastapi_login import LoginManager
+
 from database.utility import site
+from database.vars import envConfig
 import sys, asyncio
 
 try:
@@ -16,6 +19,8 @@ else:
 app = FastAPI()
 # mount AdminSite instance
 site.mount_app(app)
+
+manager = LoginManager(envConfig.SECRET_KEY, "/login")
 
 @app.get("/")
 def read_root():

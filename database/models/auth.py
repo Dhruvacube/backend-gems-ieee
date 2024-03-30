@@ -15,6 +15,7 @@ class Session(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_as = relationship(User)
+    token = Column(String, index=True)
     valid_till = Column(DateTime, default=session_dt)
     
     def __repr__(self):

@@ -60,14 +60,37 @@ class Guest(Base):
     def __repr__(self):
         return f"<Guest {self.name}>"
 
-class User(Guest):
+class User(Base):
     __tablename__ = "users"
     
-    id = mapped_column(Integer, primary_key=True, index=True)
-    name = mapped_column(String, index=True)
-    email = mapped_column(String, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, index=True)
+    alt_email = Column(String, unique=True, index=True, nullable=True)
+    phone = Column(String, index=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
     hashed_password = Column(String)
     organizations: Mapped[List["Organization"]] = relationship(back_populates="users")
+    profile_photo = Column(String, nullable=True)
+    
+    @validates("email", "alt_email")
+    def validate_email(self, key, address):
+        pat = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if re.match(pat,address):
+            return address
+        else:
+            raise ValueError("Failed simple email validation")
+    
+    @validates("phone")
+    def validate_phone(self, key, address):
+        try:
+            if carrier._is_mobile(number_type(phonenumbers.parse(address))):
+                return address
+            else:
+                raise ValueError("Not a mobile number")
+        except Exception:
+            raise ValueError("Failed simple phone no validation")
 
     def __repr__(self):
         return f"<User {self.username}>"
