@@ -1,8 +1,11 @@
 import datetime
+import email
+from os import name
 from sqlalchemy import (
     select,
     insert,
-    delete
+    delete,
+    update
 )
 
 from .models.auth import *
@@ -140,7 +143,7 @@ async def create_invite(user: GuestCreateSchema) -> int:
         await session.commit()
         return int(row.id)
 
-async def get_session(session_data: UserLogoutSchema) -> bool:
+async def get_session(session_data: UserLogoutSchema, return_user: bool = False) -> Union[bool, int]:
     """
     Get a session from the database
     :param session_data: Session data
@@ -152,6 +155,8 @@ async def get_session(session_data: UserLogoutSchema) -> bool:
         )
         record = await session.execute(query)
         record = record.fetchone()
+    if return_user:
+        return record.user_as.email
     return record is not None or record is not MISSING
 
 async def delete_redundant_sessions():
@@ -162,6 +167,25 @@ async def delete_redundant_sessions():
     async with session_obj() as session:
         query = delete(Session).where(
             Session.valid_till < datetime.datetime.now() - datetime.timedelta(minutes=15)
+        )
+        await session.execute(query)
+        await session.commit()
+
+async def update_user(user: UserEditSchema):
+    """
+    Update a user in the database
+    :param user: User object schema
+    :return: None
+    """
+    async with session_obj() as session:
+        query = update(User).where(
+            User.email == user.email
+        ).values(
+            phone=user.phone,
+            alt_email=user.alt_email,
+            updated_at=datetime.datetime.now(),
+            profile_photo=user.profile_photo_link,
+            name=user.name
         )
         await session.execute(query)
         await session.commit()

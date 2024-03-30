@@ -75,7 +75,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 def logout(user: UserLogoutSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
-    elif not get_session(user):
+    elif not run(get_session(user)):
         raise HTTPException(status_code=400, detail="Invalid session")
     run(remove_session(user.jwt_token))
     return {
@@ -97,7 +97,7 @@ def register(user: UserCreateSchema, db=Depends(get_db)):
 def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
     if invite.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
-    elif not get_session(invite):
+    elif not run(get_session(invite)):
         raise HTTPException(status_code=400, detail="Invalid session")
     if query_user(invite.email) is not None:
         raise HTTPException(status_code=400, detail="A user with this email already exists")
@@ -108,14 +108,14 @@ def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
         "invitation_id": unique_id
     }
 
-# @app.post("/edituser")
-# def edituser(user: UserEditSchema, db=Depends(get_db)):
-#     if user.jwt_token is MISSING:
-#         raise HTTPException(status_code=400, detail="No token provided")
-#     elif not get_session(user):
-#         raise HTTPException(status_code=400, detail="Invalid session")
-#     run(update_user(user))
-#     return {
-#         "status": 200,
-#         "message": "User updated successfully",
-#     }
+@app.post("/edituser")
+def edituser(user: UserEditSchema, db=Depends(get_db)):
+    if user.jwt_token is MISSING:
+        raise HTTPException(status_code=400, detail="No token provided")
+    elif not run(get_session(user)):
+        raise HTTPException(status_code=400, detail="Invalid session")
+    run(update_user(user))
+    return {
+        "status": 200,
+        "message": "User updated successfully",
+    }
