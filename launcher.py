@@ -1,7 +1,9 @@
-import sys, asyncio, click, subprocess, importlib, traceback, uvicorn
+import sys, asyncio, click, subprocess, importlib, traceback, uvicorn, os
 
-from vars import BASE_DIR
-from .database import Base, Session
+from database.vars import BASE_DIR
+from database.utility import Base
+from database.session import Session
+from pathlib import Path
 
 try:
     import uvloop  # type: ignore
@@ -48,7 +50,7 @@ def init(models):
     run = asyncio.get_event_loop().run_until_complete
     if not models:
         models = [
-            f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else Trie,(BASE_DIR / "database/models").walk(on_error=print)[3]) # type:ignore
+           f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
         ]
     else:
         models = [
@@ -78,7 +80,7 @@ def drop(models):
     click.confirm("Do you really want to do this?", abort=True)
     if models.lower() == "all":
         models = [
-            f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else Trie,(BASE_DIR / "database/models").walk(on_error=print)[3]) # type:ignore
+            f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
         ]
     else:
         models = [

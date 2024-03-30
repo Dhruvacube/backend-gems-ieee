@@ -2,10 +2,12 @@ import asyncio
 import importlib
 import traceback
 
-from ..vars import *
+from .vars import envConfig, BASE_DIR
+from .utility import Base
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
+import os
 
 from alembic import context
 
@@ -17,7 +19,7 @@ config = context.config
 config.set_main_option("sqlalchemy.url", envConfig.DATABASE_URL)
 
 models = [
-    f"database.models.{e}" for e in (BASE_DIR / "database/models").walk(on_error=print)[3] # type:ignore
+    f"database.models.{e}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
 ]
 for ext in models:
     try:

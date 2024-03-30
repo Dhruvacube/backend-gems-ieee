@@ -1,6 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI
+from database.utility import site
 import sys, asyncio
 
 try:
@@ -13,7 +14,8 @@ else:
     uvloop.install()
 
 app = FastAPI()
-
+# mount AdminSite instance
+site.mount_app(app)
 
 @app.get("/")
 def read_root():

@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from ..vars import envConfig
+from .vars import envConfig
 
 log = logging.getLogger(__name__)
 
