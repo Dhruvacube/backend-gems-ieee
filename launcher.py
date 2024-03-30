@@ -3,7 +3,8 @@ import sys, asyncio, click, subprocess, importlib, traceback, uvicorn, os
 from database.vars import BASE_DIR
 from database.db_actions import Base
 from database.session import Session
-from pathlib import Path
+
+os.environ["ALEMBIC_CONFIG"] = str(BASE_DIR/".ini")
 
 try:
     import uvloop  # type: ignore

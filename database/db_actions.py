@@ -1,5 +1,4 @@
 import datetime
-import email
 from os import name
 from sqlalchemy import (
     select,
