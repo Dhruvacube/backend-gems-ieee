@@ -1,0 +1,316 @@
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /:
+    get:
+      summary: Home
+      operationId: home__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /login:
+    post:
+      summary: Login
+      operationId: login_login_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_login_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /logout:
+    post:
+      summary: Logout
+      operationId: logout_logout_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogoutSchema'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /signup:
+    post:
+      summary: Register
+      operationId: register_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateSchema'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /invitation:
+    post:
+      summary: Invitation
+      operationId: invitation_invitation_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestCreateSchema'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /edituser:
+    post:
+      summary: Edituser
+      operationId: edituser_edituser_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditSchema'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Body_login_login_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: password
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_login_post
+    GuestCreateSchema:
+      properties:
+        jwt_token:
+          type: string
+          title: Jwt Token
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        alt_email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Alt Email
+        phone:
+          type: string
+          title: Phone
+        organization_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Name
+        role:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Role
+        valid_till:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Valid Till
+      type: object
+      required:
+      - jwt_token
+      - name
+      - email
+      - alt_email
+      - phone
+      - organization_name
+      - role
+      - valid_till
+      title: GuestCreateSchema
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    UserCreateSchema:
+      properties:
+        invite_id:
+          type: string
+          title: Invite Id
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+      - invite_id
+      - password
+      title: UserCreateSchema
+    UserEditSchema:
+      properties:
+        jwt_token:
+          type: string
+          title: Jwt Token
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        alt_email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Alt Email
+        phone:
+          type: string
+          title: Phone
+        organization_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Organization Name
+        role:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Role
+        valid_till:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Valid Till
+        profile_photo_link:
+          anyOf:
+          - type: string
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Profile Photo Link
+      type: object
+      required:
+      - jwt_token
+      - name
+      - email
+      - alt_email
+      - phone
+      - organization_name
+      - role
+      - valid_till
+      - profile_photo_link
+      title: UserEditSchema
+    UserLogoutSchema:
+      properties:
+        jwt_token:
+          type: string
+          title: Jwt Token
+      type: object
+      required:
+      - jwt_token
+      title: UserLogoutSchema
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

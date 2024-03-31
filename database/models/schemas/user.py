@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, AnyHttpUrl
 from typing import Optional
 import datetime
 
@@ -11,14 +11,14 @@ class GuestSchema(BaseModel):
     name: str
     email: EmailStr
     alt_email: Optional[EmailStr]
-    phone: str
+    phone: str 
 
 class UserCreateSchema(BaseModel):
     invite_id: str
     password: str
 
 class UserLoginSchema(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class UserLogoutSchema(BaseModel):
@@ -30,4 +30,4 @@ class GuestCreateSchema(GuestSchema, UserLogoutSchema):
     valid_till: Optional[datetime.datetime]
 
 class UserEditSchema(GuestCreateSchema):
-    profile_photo_link: Optional[str]
+    profile_photo_link: Optional[AnyHttpUrl]

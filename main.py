@@ -38,7 +38,13 @@ def query_user(email: str, via_id: bool = False):
 
 @app.get("/")
 def home():
-    return {"Hello": "World"}
+    return {
+        "Hello": "World",
+        "description": "This is the backend work for the IEEE GEMS Backend Task, Instructions to host locally is given in README.md. This has been developed using python language and FastAPI framework.",
+        "author": "Dhruva Shaw",
+        "documentation": "http://127.0.0.1:80/docs",
+        "admin panel for the scheduler": "http://127.0.0.1:80/admin"
+    }
 
 
 @app.post("/login")
