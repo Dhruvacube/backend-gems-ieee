@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from database.utility import *
 from database.vars import MISSING
 from database.sync_session import get_db
-from database.session import session_obj
 from database.models.auth import *
 from database.models.user import *
 from database.models.schemas.user import *
