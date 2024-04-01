@@ -57,7 +57,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
     if not user:
         # you can return any response or error of your choice
         raise InvalidCredentialsException
-    elif hash_password(password) != user["password"]:
+    if hash_password(password) != user["password"]:
         raise InvalidCredentialsException
 
     access_token = create_access_token(
@@ -85,7 +85,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 def logout(user: UserLogoutSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
-    elif not run(get_session(user)):
+    if not run(get_session(user)):
         raise HTTPException(status_code=400, detail="Invalid session")
     run(remove_session(user.jwt_token))
     return {"status": 200, "message": "Logout successful"}
@@ -108,7 +108,7 @@ def register(user: UserCreateSchema, db=Depends(get_db)):
 def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
     if invite.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
-    elif not run(get_session(invite)):
+    if not run(get_session(invite)):
         raise HTTPException(status_code=400, detail="Invalid session")
     if query_user(invite.email) is not None:
         raise HTTPException(
@@ -126,7 +126,7 @@ def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
 def edituser(user: UserEditSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
-    elif not run(get_session(user)):
+    if not run(get_session(user)):
         raise HTTPException(status_code=400, detail="Invalid session")
     run(update_user(user))
     return {
