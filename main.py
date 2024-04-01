@@ -26,7 +26,7 @@ app = FastAPI()
 # mount AdminSite instance
 site.mount_app(app)
 
-run = asyncio.get_event_loop().run_until_complete
+run = asyncio.new_event_loop().run_until_complete
 
 def query_user(email: str, via_id: bool = False):
     """
