@@ -97,9 +97,7 @@ config.set_main_option("sqlalchemy.url", envConfig.DATABASE_URL)
 models = [
     f"database.models.{e.strip().rstrip('.py')}"
     for e in filter(
-        lambda a: (
-            False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True
-        ),
+        lambda a: not (a.lower() == "__init__.py" or a.lower() == "__init__"),
         list(os.walk(BASE_DIR / "database/models"))[0][2],
     )
 ]
