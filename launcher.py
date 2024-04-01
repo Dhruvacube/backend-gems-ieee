@@ -4,7 +4,7 @@ from database.vars import BASE_DIR
 from database.db_actions import Base
 from database.session import Session
 
-os.environ["ALEMBIC_CONFIG"] = str(BASE_DIR/".ini")
+os.environ["ALEMBIC_CONFIG"] = str(BASE_DIR / ".ini")
 
 try:
     import uvloop  # type: ignore
@@ -24,6 +24,7 @@ def main(ctx):
         # print("In the same bash terminal type out the following command to start the server:")
         # print("uvicorn main:app --host 0.0.0.0 --port 80")
         uvicorn.run("main:app", port=80, log_level="info")
+
 
 async def create_tables():
     engine = Session.get_engine()
@@ -51,13 +52,18 @@ def init(models):
     run = asyncio.get_event_loop().run_until_complete
     if not models:
         models = [
-           f"database.models.{e.strip().rstrip('.py')}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
+            f"database.models.{e.strip().rstrip('.py')}"
+            for e in filter(
+                lambda a: (
+                    False
+                    if (a.lower() == "__init__.py" or a.lower() == "__init__")
+                    else True
+                ),
+                list(os.walk(BASE_DIR / "database/models"))[0][2],
+            )
         ]
     else:
-        models = [
-            f"database.models.{e.lower()}"
-            for e in models
-        ]
+        models = [f"database.models.{e.lower()}" for e in models]
     for ext in models:
         try:
             importlib.import_module(ext)
@@ -66,6 +72,7 @@ def init(models):
             return
     run(create_tables())
     click.echo("Tables created in the database.")
+
 
 @db.command(short_help="removes a model's table", options_metavar="[options]")
 @click.argument("models", metavar="<models>", default="all")
@@ -81,13 +88,18 @@ def drop(models):
     click.confirm("Do you really want to do this?", abort=True)
     if models.lower() == "all":
         models = [
-            f"database.models.{e.strip().rstrip('.py')}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
+            f"database.models.{e.strip().rstrip('.py')}"
+            for e in filter(
+                lambda a: (
+                    False
+                    if (a.lower() == "__init__.py" or a.lower() == "__init__")
+                    else True
+                ),
+                list(os.walk(BASE_DIR / "database/models"))[0][2],
+            )
         ]
     else:
-        models = [
-            f"database.models.{e.lower()}"
-            for e in models
-        ]
+        models = [f"database.models.{e.lower()}" for e in models]
     for ext in models:
         try:
             importlib.import_module(ext)
@@ -96,6 +108,7 @@ def drop(models):
             return
     run(drop_tables())
     click.echo("Tables deleted from the database.")
+
 
 @db.command(short_help="Create migrations for the databases")
 @click.option("--message", prompt=True)
@@ -107,6 +120,7 @@ def makemigrations(message):
         check=False,
     )
     click.echo("Created migrations.")
+
 
 @db.command(short_help="Migrates from an migration revision")
 @click.option("--upgrade/--downgrade", default=True)

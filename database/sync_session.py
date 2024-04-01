@@ -4,7 +4,9 @@ from sqlalchemy.orm import sessionmaker
 
 from .vars import envConfig
 
-engine = create_engine(envConfig.DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    envConfig.DATABASE_URL, connect_args={"check_same_thread": False}
+)
 Base = declarative_base()
 db_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -22,6 +24,6 @@ class DBContext:
 
 
 def get_db():
-    """ Returns the current db connection """
+    """Returns the current db connection"""
     with DBContext() as db:
         yield db
