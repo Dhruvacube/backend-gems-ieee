@@ -1,5 +1,4 @@
 import datetime
-from os import name
 from sqlalchemy import select, insert, delete, update
 
 from .models.auth import *
