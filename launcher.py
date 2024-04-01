@@ -21,8 +21,6 @@ else:
 def main(ctx):
     """Lays out the steps on how to launch the api server."""
     if ctx.invoked_subcommand is None:
-        # print("In the same bash terminal type out the following command to start the server:")
-        # print("uvicorn main:app --host 0.0.0.0 --port 80")
         uvicorn.run("main:app", port=80, log_level="info")
 
 
