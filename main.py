@@ -28,6 +28,7 @@ site.mount_app(app)
 
 run = asyncio.new_event_loop().run_until_complete
 
+
 def query_user(email: str, via_id: bool = False):
     """
     Get a user from the db
@@ -36,6 +37,7 @@ def query_user(email: str, via_id: bool = False):
     """
     return run(return_user(email, via_id))
 
+
 @app.get("/")
 def home():
     return {
@@ -43,7 +45,7 @@ def home():
         "description": "This is the backend work for the IEEE GEMS Backend Task, Instructions to host locally is given in README.md. This has been developed using python language and FastAPI framework.",
         "author": "Dhruva Shaw",
         "documentation": "http://127.0.0.1:80/docs",
-        "admin panel for the scheduler": "http://127.0.0.1:80/admin"
+        "admin panel for the scheduler": "http://127.0.0.1:80/admin",
     }
 
 
@@ -58,8 +60,10 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
         raise InvalidCredentialsException
     elif hash_password(password) != user["password"]:
         raise InvalidCredentialsException
-    
-    access_token = create_access_token(data={"sub": email, "pwd": hash_password(password)})
+
+    access_token = create_access_token(
+        data={"sub": email, "pwd": hash_password(password)}
+    )
     run(insert_session(user, access_token))
     return {
         "status": 200,
@@ -77,6 +81,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
         "User.alt_email": user["alt_email"],
     }
 
+
 @app.post("/logout")
 def logout(user: UserLogoutSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
@@ -84,20 +89,21 @@ def logout(user: UserLogoutSchema, db=Depends(get_db)):
     elif not run(get_session(user)):
         raise HTTPException(status_code=400, detail="Invalid session")
     run(remove_session(user.jwt_token))
-    return {
-        "status": 200,
-        "message": "Logout successful"
-    }
+    return {"status": 200, "message": "Logout successful"}
+
 
 @app.post("/signup")
 def register(user: UserCreateSchema, db=Depends(get_db)):
     if query_user(user.invite_id, True) is not None:
-        raise HTTPException(status_code=400, detail="A user with this invite id already exists")
+        raise HTTPException(
+            status_code=400, detail="A user with this invite id already exists"
+        )
     run(create_user(user))
     return {
         "status": 200,
         "message": "User created successfully",
     }
+
 
 @app.post("/invitation")
 def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
@@ -106,13 +112,16 @@ def invitation(invite: GuestCreateSchema, db=Depends(get_db)):
     elif not run(get_session(invite)):
         raise HTTPException(status_code=400, detail="Invalid session")
     if query_user(invite.email) is not None:
-        raise HTTPException(status_code=400, detail="A user with this email already exists")
+        raise HTTPException(
+            status_code=400, detail="A user with this email already exists"
+        )
     unique_id = run(create_invite(invite))
     return {
         "status": 200,
         "message": "Invite created successfully",
-        "invitation_id": unique_id
+        "invitation_id": unique_id,
     }
+
 
 @app.post("/edituser")
 def edituser(user: UserEditSchema, db=Depends(get_db)):
