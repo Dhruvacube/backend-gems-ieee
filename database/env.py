@@ -10,7 +10,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from alembic import context
 
 import configparser
-import os
 from pathlib import Path
 from typing import Any
 
