@@ -16,6 +16,7 @@ from typing import Any
 
 Base = declarative_base()
 
+
 # only way to resolve the circular, yes this is the only way
 class _MissingSentinel:
     __slots__ = ()
@@ -44,6 +45,7 @@ MISSING: Any = _MissingSentinel()
 BASE_DIR = Path(__file__).resolve().parent.parent  # In minato_namikaze/ folder
 CONFIG_FILE = BASE_DIR / ".ini"
 
+
 def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
     """Helper function to get the credentials from the environment variables or from the configuration file
 
@@ -59,7 +61,7 @@ def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
         if CONFIG_FILE.is_file():
             config = configparser.ConfigParser()
             config.read(CONFIG_FILE)
-            sections = config._sections #type: ignore
+            sections = config._sections  # type: ignore
             for i in sections:
                 for j in sections[i]:
                     if j.lower() == tokenname.lower():
@@ -69,7 +71,7 @@ def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
     if CONFIG_FILE.is_file():
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE)
-        return config._sections #type: ignore
+        return config._sections  # type: ignore
     raise RuntimeError("Could not find .ini file")
 
 
@@ -94,7 +96,13 @@ config = context.config
 config.set_main_option("sqlalchemy.url", envConfig.DATABASE_URL)
 
 models = [
-    f"database.models.{e.strip().rstrip('.py')}" for e in filter(lambda a: False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True, list(os.walk(BASE_DIR / "database/models"))[0][2])
+    f"database.models.{e.strip().rstrip('.py')}"
+    for e in filter(
+        lambda a: (
+            False if (a.lower() == "__init__.py" or a.lower() == "__init__") else True
+        ),
+        list(os.walk(BASE_DIR / "database/models"))[0][2],
+    )
 ]
 for ext in models:
     try:
@@ -154,7 +162,7 @@ async def run_migrations_online() -> None:
     """
     connectable = AsyncEngine(
         engine_from_config(
-            config.get_section(config.config_ini_section), # type:ignore
+            config.get_section(config.config_ini_section),  # type:ignore
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
             future=True,

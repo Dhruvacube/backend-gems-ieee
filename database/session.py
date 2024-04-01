@@ -25,7 +25,7 @@ class Session:
     def get_session() -> sessionmaker:
         """Return the database session connection."""
         db_session = sessionmaker(
-            bind=Session.get_engine(), # type: ignore
+            bind=Session.get_engine(),  # type: ignore
             autoflush=True,
             class_=AsyncSession,
             expire_on_commit=False,

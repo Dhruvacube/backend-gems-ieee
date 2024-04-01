@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+
 # only way to resolve the circular, yes this is the only way
 class _MissingSentinel:
     __slots__ = ()
@@ -31,6 +32,7 @@ MISSING: Any = _MissingSentinel()
 BASE_DIR = Path(__file__).resolve().parent.parent  # In minato_namikaze/ folder
 CONFIG_FILE = BASE_DIR / ".ini"
 
+
 def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
     """Helper function to get the credentials from the environment variables or from the configuration file
 
@@ -46,7 +48,7 @@ def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
         if CONFIG_FILE.is_file():
             config = configparser.ConfigParser()
             config.read(CONFIG_FILE)
-            sections = config._sections #type: ignore
+            sections = config._sections  # type: ignore
             for i in sections:
                 for j in sections[i]:
                     if j.lower() == tokenname.lower():
@@ -56,7 +58,7 @@ def token_get(tokenname: str = MISSING, all: bool = False) -> Any:
     if CONFIG_FILE.is_file():
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE)
-        return config._sections #type: ignore
+        return config._sections  # type: ignore
     raise RuntimeError("Could not find .ini file")
 
 
