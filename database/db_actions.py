@@ -130,12 +130,7 @@ async def create_invite(user: GuestCreateSchema) -> int:
                     email=user.email,
                     alt_email=user.alt_email,
                     phone=user.phone,
-                    organizations=Organization(
-                        id=row.id,
-                        name=user.organization_name,
-                        role=user.role,
-                        valid_till=user.valid_till,
-                    ),
+                    organizations=row.id
                 )
                 .returning(Guest.id)
             )

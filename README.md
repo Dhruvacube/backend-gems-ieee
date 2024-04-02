@@ -16,7 +16,7 @@ Get into that directory
 cd backend-gems-ieee
 ```
 
-Now rename the `example.ini` to `.ini`. 
+Now rename the `example.ini` to `.ini`.
 
 Now in the `.ini` in `line 5` at `DATABASE_URL` change the following:
 
@@ -28,7 +28,6 @@ Now in the `.ini` in `line 5` at `DATABASE_URL` change the following:
 A eg `DATABASE_URL` url string the `.ini`:
 
 `postgresql+asyncpg://postgres:cube12345@localhost/backendapi`
-
 
 Now in the same terminal where the first 2 bash commands were executed, execute the following commands now:
 
@@ -42,7 +41,6 @@ Setup the database programatically:
 
 ```bash
 python launcher.py db init
-python launcher.py db migrate
 ```
 
 Now run the program:
@@ -54,7 +52,6 @@ python launcher.py
 Now open the following links to work with api and know more about it:
 
 - `API url where api is hosted`: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-- `Admin url where one see the scheduler scheduled`: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
+- `Admin url where one see the scheduler scheduled`: [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
 - `The documentation of API (to see what all the routes and its syntax)`: [http://127.0.0.1/docs](http://127.0.0.1/docs)
+- Default user details, name: `admin` , email: `admin@admin.com` , password: `admin`
