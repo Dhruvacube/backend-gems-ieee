@@ -20,6 +20,7 @@ from phonenumbers.phonenumberutil import number_type
 Base = declarative_base()
 session_dt = lambda: datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
 
+
 class Organization(Base):
     __tablename__ = "organizations"
 
@@ -27,8 +28,11 @@ class Organization(Base):
     name = Column(String, index=True)
     role = Column(String, index=True)
     valid_till = Column(DateTime, default=datetime.datetime.utcnow)
-    guests_id = Column(Integer, ForeignKey("guest.id", ondelete='CASCADE'), nullable=True)
-    users_id = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'), nullable=True)
+    guests_id = Column(
+        Integer, ForeignKey("guest.id", ondelete="CASCADE"), nullable=True
+    )
+    users_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
+
     def __repr__(self):
         return f"<Organization {self.name}, role: {self.role}, validity: {self.valid_till}>"
 
@@ -43,7 +47,9 @@ class Guest(Base):
     phone = Column(String, index=True, unique=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    organizations: Mapped[List["Organization"]] = relationship("Organization",backref=backref("guest", passive_deletes=True), lazy='subquery')
+    organizations: Mapped[List["Organization"]] = relationship(
+        "Organization", backref=backref("guest", passive_deletes=True), lazy="subquery"
+    )
 
     @validates("email", "alt_email")
     def validate_email(self, key, address):
@@ -77,8 +83,12 @@ class User(Base):
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
     invite_id = Column(Integer, index=True, unique=True, nullable=True)
     password = Column(String)
-    organizations: Mapped[List["Organization"]] = relationship("Organization", backref=backref("user", passive_deletes=True), lazy='subquery')
-    sessions = relationship("SessionUser", backref=backref("user", passive_deletes=True), lazy='subquery')
+    organizations: Mapped[List["Organization"]] = relationship(
+        "Organization", backref=backref("user", passive_deletes=True), lazy="subquery"
+    )
+    sessions = relationship(
+        "SessionUser", backref=backref("user", passive_deletes=True), lazy="subquery"
+    )
     profile_photo = Column(URLType, nullable=True)
 
     @validates("email", "alt_email")
@@ -100,11 +110,12 @@ class User(Base):
     def __repr__(self):
         return f"<User {self.name}>"
 
+
 class SessionUser(Base):
     __tablename__ = "sessionsusers"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    users_as = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'), nullable=True)
+    users_as = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
     token = Column(String, index=True, unique=True)
     valid_till = Column(DateTime, default=session_dt)
 

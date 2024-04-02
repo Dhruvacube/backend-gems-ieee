@@ -41,18 +41,19 @@ async def drop_tables():
 
 async def create_admin_user():
     async with session_obj() as session:
-        query = insert(User).values(name="admin", email="admin@admin.com", password=hash_password("admin"))
+        query = insert(User).values(
+            name="admin", email="admin@admin.com", password=hash_password("admin")
+        )
         await session.execute(query)
         await session.commit()
+
 
 @main.group(short_help="database stuff", options_metavar="[options]")
 def db():
     pass
 
 
-@db.command(
-    short_help="initialises the databases for the API"
-)
+@db.command(short_help="initialises the databases for the API")
 def init():
     """This manages the migrations and database creation system for you."""
     run = asyncio.get_event_loop().run_until_complete

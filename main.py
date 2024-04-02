@@ -51,7 +51,7 @@ def home():
 def login(data: OAuth2PasswordRequestForm = Depends()):
     email = data.username
     password = data.password
-    
+
     user = query_user(email)[0]
     if not user:
         # you can return any response or error of your choice
@@ -93,11 +93,11 @@ def logout(user: UserLogoutSchema, db=Depends(get_db)):
 
 @app.post("/signup")
 def register(user: UserCreateSchema, db=Depends(get_db)):
-    if query_user(user.invite_id, True) is not MISSING: #type: ignore
+    if query_user(user.invite_id, True) is not MISSING:  # type: ignore
         raise HTTPException(
             status_code=400, detail="A user with this invite id already exists"
         )
-    run(create_user(user)) 
+    run(create_user(user))
     return {
         "status": 200,
         "message": "User created successfully",
