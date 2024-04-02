@@ -5,9 +5,11 @@ from typing import List
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import ForeignKey, Integer, String, DateTime, Column
+from sqlalchemy_utils import URLType
+
 from sqlalchemy.orm import validates
 
 import datetime, re
@@ -16,22 +18,23 @@ from phonenumbers import carrier
 from phonenumbers.phonenumberutil import number_type
 
 Base = declarative_base()
-
+session_dt = lambda: datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
 
 class Organization(Base):
     __tablename__ = "organizations"
 
-    id = mapped_column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = mapped_column(String, index=True)
-    role = mapped_column(String, index=True)
-    valid_till = mapped_column(DateTime, default=datetime.datetime.utcnow)
-
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(String, index=True)
+    role = Column(String, index=True)
+    valid_till = Column(DateTime, default=datetime.datetime.utcnow)
+    guests_id = Column(Integer, ForeignKey("guest.id", ondelete='CASCADE'), nullable=True)
+    users_id = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'), nullable=True)
     def __repr__(self):
         return f"<Organization {self.name}, role: {self.role}, validity: {self.valid_till}>"
 
 
 class Guest(Base):
-    __tablename__ = "guests"
+    __tablename__ = "guest"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
@@ -40,7 +43,7 @@ class Guest(Base):
     phone = Column(String, index=True, unique=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    organizations: Mapped[List["Organization"]] = relationship(back_populates="guests")
+    organizations: Mapped[List["Organization"]] = relationship("Organization",backref=backref("guest", passive_deletes=True), lazy='subquery')
 
     @validates("email", "alt_email")
     def validate_email(self, key, address):
@@ -63,7 +66,7 @@ class Guest(Base):
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
@@ -72,10 +75,11 @@ class User(Base):
     phone = Column(String, index=True, unique=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    invite_id = Column(String, index=True, unique=True, nullable=True)
-    hashed_password = Column(String)
-    organizations: Mapped[List["Organization"]] = relationship(back_populates="users")
-    profile_photo = Column(String, nullable=True)
+    invite_id = Column(Integer, index=True, unique=True, nullable=True)
+    password = Column(String)
+    organizations: Mapped[List["Organization"]] = relationship("Organization", backref=backref("user", passive_deletes=True), lazy='subquery')
+    sessions = relationship("SessionUser", backref=backref("user", passive_deletes=True), lazy='subquery')
+    profile_photo = Column(URLType, nullable=True)
 
     @validates("email", "alt_email")
     def validate_email(self, key, address):
@@ -94,4 +98,15 @@ class User(Base):
             raise ValueError("Failed simple phone no validation")
 
     def __repr__(self):
-        return f"<User {self.username}>"
+        return f"<User {self.name}>"
+
+class SessionUser(Base):
+    __tablename__ = "sessionsusers"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    users_as = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'), nullable=True)
+    token = Column(String, index=True, unique=True)
+    valid_till = Column(DateTime, default=session_dt)
+
+    def __repr__(self):
+        return f"<Session {self.id}>"

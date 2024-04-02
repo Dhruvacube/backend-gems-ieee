@@ -1,7 +1,6 @@
 import datetime
 from sqlalchemy import select, insert, delete, update
 
-from .models.auth import *
 from .models.user import *
 from .session import session_obj
 from .models.schemas.user import *
@@ -9,6 +8,7 @@ from .vars import MISSING
 
 from typing import Union
 from hashlib import sha256
+from fastapi import HTTPException
 
 
 # hasing function
@@ -58,7 +58,7 @@ async def insert_session(user, token: str):
     :return: None
     """
     async with session_obj() as session:
-        query = insert(Session).values(user_as=user, token=token)
+        query = insert(SessionUser).values(users_as=user.id, token=token)
         await session.execute(query)
         await session.commit()
 
@@ -70,7 +70,7 @@ async def remove_session(token: str):
     :return: None
     """
     async with session_obj() as session:
-        query = delete(Session).where(Session.token == token)
+        query = delete(SessionUser).where(SessionUser.token == token)
         await session.execute(query)
         await session.commit()
 
@@ -82,6 +82,12 @@ async def create_user(user: UserCreateSchema):
     :return: None
     """
     guest_details = await return_guests(int(user.invite_id))
+    if guest_details is MISSING:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     async with session_obj() as session:
         query = insert(User).values(
             email=guest_details.email,
@@ -159,11 +165,11 @@ async def get_session(
     :return: bool
     """
     async with session_obj() as session:
-        query = select(Session).where(Session.token == session_data.jwt_token)
+        query = select(SessionUser).where(SessionUser.token == session_data.jwt_token)
         record = await session.execute(query)
         record = record.fetchone()
     if return_user:
-        return record.user_as.email
+        return record.users_as.email
     return record is not None or record is not MISSING
 
 
@@ -173,8 +179,8 @@ async def delete_redundant_sessions():
     :return: None
     """
     async with session_obj() as session:
-        query = delete(Session).where(
-            Session.valid_till
+        query = delete(SessionUser).where(
+            SessionUser.valid_till
             < datetime.datetime.now() - datetime.timedelta(minutes=15)
         )
         await session.execute(query)

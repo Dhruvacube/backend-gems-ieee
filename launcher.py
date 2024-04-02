@@ -2,7 +2,10 @@ import sys, asyncio, click, subprocess, importlib, traceback, uvicorn, os
 
 from database.vars import BASE_DIR
 from database.db_actions import Base
-from database.session import Session
+from database.session import Session, session_obj
+from database.utility import hash_password
+from database.models.user import User
+from sqlalchemy import insert
 
 os.environ["ALEMBIC_CONFIG"] = str(BASE_DIR / ".ini")
 
@@ -36,28 +39,30 @@ async def drop_tables():
         await conn.run_sync(Base.metadata.drop_all)
 
 
+async def create_admin_user():
+    async with session_obj() as session:
+        query = insert(User).values(name="admin", email="admin@admin.com", password=hash_password("admin"))
+        await session.execute(query)
+        await session.commit()
+
 @main.group(short_help="database stuff", options_metavar="[options]")
 def db():
     pass
 
 
 @db.command(
-    short_help="initialises the databases for the API", options_metavar="[options]"
+    short_help="initialises the databases for the API"
 )
-@click.argument("models", nargs=-1, metavar="[models]")
-def init(models):
+def init():
     """This manages the migrations and database creation system for you."""
     run = asyncio.get_event_loop().run_until_complete
-    if not models:
-        models = [
-            f"database.models.{e.strip().rstrip('.py')}"
-            for e in filter(
-                lambda a: not (a.lower() == "__init__.py" or a.lower() == "__init__"),
-                list(os.walk(BASE_DIR / "database/models"))[0][2],
-            )
-        ]
-    else:
-        models = [f"database.models.{e.lower()}" for e in models]
+    models = [
+        f"database.models.{e.strip().rstrip('.py')}"
+        for e in filter(
+            lambda a: not (a.lower() == "__init__.py" or a.lower() == "__init__"),
+            list(os.walk(BASE_DIR / "database/models"))[0][2],
+        )
+    ]
     for ext in models:
         try:
             importlib.import_module(ext)
@@ -65,6 +70,7 @@ def init(models):
             click.echo(f"Could not load {ext}.\n{traceback.format_exc()}", err=True)
             return
     run(create_tables())
+    run(create_admin_user())
     click.echo("Tables created in the database.")
 
 

@@ -17,7 +17,7 @@ class GuestSchema(BaseModel):
 
 
 class UserCreateSchema(BaseModel):
-    invite_id: str
+    invite_id: int
     password: str
 
 

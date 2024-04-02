@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from database.utility import *
 from database.vars import MISSING
 from database.sync_session import get_db
-from database.models.auth import *
 from database.models.user import *
 from database.models.schemas.user import *
 from database.db_actions import *
@@ -52,12 +51,12 @@ def home():
 def login(data: OAuth2PasswordRequestForm = Depends()):
     email = data.username
     password = data.password
-
-    user = query_user(email)
+    
+    user = query_user(email)[0]
     if not user:
         # you can return any response or error of your choice
         raise InvalidCredentialsException
-    if hash_password(password) != user["password"]:
+    if hash_password(password) != user.password:
         raise InvalidCredentialsException
 
     access_token = create_access_token(
@@ -69,15 +68,15 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
         "message": "Login successful",
         "access_token": access_token,
         "token_type": "bearer",
-        "User.id": user["id"],
-        "User.email": user["email"],
-        "User.name": user["name"],
-        "User.profile_photo": user["profile_photo"],
-        "User.created_at": user["created_at"],
-        "User.updated_at": user["updated_at"],
-        "User.organizations": user["organizations"],
-        "User.phone": user["phone"],
-        "User.alt_email": user["alt_email"],
+        "User.id": user.id,
+        "User.email": user.email,
+        "User.name": user.name,
+        "User.profile_photo": user.profile_photo,
+        "User.created_at": user.created_at,
+        "User.updated_at": user.updated_at,
+        "User.organizations": user.organizations,
+        "User.phone": user.phone,
+        "User.alt_email": user.alt_email,
     }
 
 
@@ -85,6 +84,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 def logout(user: UserLogoutSchema, db=Depends(get_db)):
     if user.jwt_token is MISSING:
         raise HTTPException(status_code=400, detail="No token provided")
+    print(run(get_session(user)))
     if not run(get_session(user)):
         raise HTTPException(status_code=400, detail="Invalid session")
     run(remove_session(user.jwt_token))
@@ -93,11 +93,11 @@ def logout(user: UserLogoutSchema, db=Depends(get_db)):
 
 @app.post("/signup")
 def register(user: UserCreateSchema, db=Depends(get_db)):
-    if query_user(user.invite_id, True) is not None:
+    if query_user(user.invite_id, True) is not MISSING: #type: ignore
         raise HTTPException(
             status_code=400, detail="A user with this invite id already exists"
         )
-    run(create_user(user))
+    run(create_user(user)) 
     return {
         "status": 200,
         "message": "User created successfully",
